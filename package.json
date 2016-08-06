@@ -1,0 +1,14 @@
+{
+  "name": "node-luajit",
+  "version": "1.0.0",
+  "description": "luajit node binding",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "smallwhite",
+  "license": "ISC",
+  "dependencies": {
+    "nan": "^2.4.0"
+  }
+}
