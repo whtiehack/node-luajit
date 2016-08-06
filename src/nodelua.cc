@@ -6,6 +6,7 @@
 
 extern "C"{
 #include <lua.h>
+#include <luajit.h>
 }
 
 using namespace v8;
@@ -13,8 +14,10 @@ using namespace v8;
 void init_info_constants(v8::Local<v8::Object> target){
   Local<Object> constants = Nan::New<v8::Object>();
     constants->Set(Nan::New("VERSION").ToLocalChecked(),Nan::New(LUA_VERSION).ToLocalChecked());
+    constants->Set(Nan::New("VERSION_JIT").ToLocalChecked(),Nan::New(LUAJIT_VERSION).ToLocalChecked());
     constants->Set(Nan::New("VERSION_NUM").ToLocalChecked(), Nan::New(LUA_VERSION_NUM));
     constants->Set(Nan::New("COPYRIGHT").ToLocalChecked(), Nan::New(LUA_COPYRIGHT).ToLocalChecked());
+    constants->Set(Nan::New("COPYRIGHT_JIT").ToLocalChecked(), Nan::New(LUAJIT_COPYRIGHT).ToLocalChecked());
     constants->Set(Nan::New("AUTHORS").ToLocalChecked(), Nan::New(LUA_AUTHORS).ToLocalChecked());
     target->Set(Nan::New("INFO").ToLocalChecked(), constants);
 }
