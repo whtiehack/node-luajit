@@ -53,5 +53,8 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
   init_gc_constants(exports);
   init_status_constants(exports);
   init_info_constants(exports);
+    auto L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_dostring(L,"print(222222)");
 }
 NODE_MODULE(nodelua, init)

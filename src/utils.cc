@@ -28,7 +28,7 @@ v8::Local<v8::Value> lua_to_value(lua_State* L, int i){
    break;
  case LUA_TTABLE:
    {
-     v8::Local<v8::Object> obj = v8::Object::New();
+     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
      lua_pushnil(L);
      while(lua_next(L, -2) != 0){
 	v8::Local<v8::Value> key = lua_to_value(L, -2);
