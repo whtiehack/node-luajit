@@ -52,7 +52,7 @@
               "/usr/local/lib"
             ],
             "libraries": [
-              "libluajit-5.1.so.2.0.4"
+              "/usr/local/lib/libluajit-5.1.so.2.0.4"
             ]
           }
         ]
