@@ -22,7 +22,7 @@
           }
         ],
         [
-          'OS=="mac" or OS=="linux"',
+          'OS=="linux"',
           {
             "include_dirs": [
               "<!(find /usr/include /usr/local/include $NODELUA_INCLUDE -name lua.h | sed s/lua.h//)"
@@ -32,17 +32,12 @@
         [
           'OS=="mac"',
           {
-            "library_dirs": [
-              "/usr/local/lib"
+            "include_dirs": [
+              "./maclualib/include"
             ],
             "libraries": [
-              "libluajit-5.1.dylib"
-            ],
-            'xcode_settings': {
-              'OTHER_LDFLAGS': [
-                '-pagezero_size 10000 -image_base 100000000'
-              ],
-            }
+              "../maclualib/lib/liblua.a"
+            ]
           }
         ],
         [
