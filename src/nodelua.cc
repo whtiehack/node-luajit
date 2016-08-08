@@ -53,8 +53,15 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
   init_gc_constants(exports);
   init_status_constants(exports);
   init_info_constants(exports);
+    printf("showshowshow ``` \n");
     auto L = luaL_newstate();
-    luaL_openlibs(L);
-    luaL_dostring(L,"print(222222)");
+    if(L){
+        printf("havahave  have\n");
+        luaL_openlibs(L);
+        luaL_dostring(L,"print(222222)");
+    }else{
+        printf("not not not \n");
+    }
+
 }
 NODE_MODULE(nodelua, init)
