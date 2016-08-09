@@ -18,8 +18,12 @@ var MyLua = function(){
     self.lua = new MyCLua();
     //init path
     var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so';
-    self.lua.doString('package.cpath = package.cpath .. "'+paths+'";',function(err,ret){
+    var luapaths = ';'+__dirname+'/?.lua;'+__dirname+'/test/?.lua;'+process.cwd()+'/?.lua';
+    self.lua.doString('package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";',function(err,ret){
      //   console.log('  package path:',err,ret);
+        if(err){
+            console.log('!!add find pash err:',err);
+        }
     });
  //   self.lua.doString("print(package.path)")
 };

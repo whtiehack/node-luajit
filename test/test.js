@@ -1,4 +1,4 @@
-
+'use strict';
 
 var MyLua = require('../');
 console.log('test');
@@ -8,14 +8,22 @@ console.log('test');
 
 var lua = new MyLua();
 
-
-lua.doFile('fdafda',function(err,ret){
-    console.log('hahahah err:',err,'retret:',ret);
+lua.doString(`
+local oriPrint = print;
+function print(...)
+    oriPrint('lua:',...)
+end
+cjson = require("cjson"); 
+`,function(err,ret){
+    console.log('dostr test :',err,ret);
 });
 
-lua.doString('print("12121"); local cjson; cjson = require("cjson"); ',function(err,ret){
-    console.log('ha dostr :',err,ret);
+
+lua.doFile(__dirname+'/luatest.lua',function(err,ret){
+    console.log('do file test err:',err,'retret:',ret);
 });
+
+
 
 setTimeout(function(){
     console.log('eddd');
