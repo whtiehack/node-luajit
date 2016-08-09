@@ -54,9 +54,9 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
     auto L = luaL_newstate();
     if(L){
         char buf[80];
-        getcwd(buf,sizeof(buf));
+       // getcwd(buf,sizeof(buf));
         printf("havahave  have2222\n");
-        printf("cwd:%s\n",buf);
+      //  printf("cwd:%s\n",buf);
         luaL_openlibs(L);
         auto ret = luaL_dostring(L,"print('path:' .. package.path);");
         if(ret){
