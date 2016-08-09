@@ -23,7 +23,7 @@ typedef std::function<void(MyLuaWorker*)> WorkerCall;
 class MyLuaWorker : public Nan::AsyncWorker {
 public:
     MyLuaWorker(Nan::Callback *callback,WorkerCall workerCall,FinishCallBack finishCb) :
-        Nan::AsyncWorker(callback),_finishCb(finishCb),_workerCall(workerCall)
+        Nan::AsyncWorker(callback),userParam(nullptr),_finishCb(finishCb),_workerCall(workerCall)
     {
     }
     ~MyLuaWorker(){}
@@ -31,7 +31,7 @@ public:
     void Execute ();
     struct UserDatas{
         bool hasErr = false;
-        char buff[258] = {0};
+        char buff[512] = {0};
         
     };
     // Executed when the async work is complete
@@ -45,11 +45,15 @@ public:
     
     void setUserData(bool hasErr,const char* buff){
         _userData.hasErr = hasErr;
-        strcpy(_userData.buff, buff);
+        if(buff){
+            strcpy(_userData.buff, buff);
+        }
     }
     UserDatas& getUserData(){
         return _userData;
     }
+    
+    void* userParam;
 private:
     FinishCallBack _finishCb;
     WorkerCall _workerCall;

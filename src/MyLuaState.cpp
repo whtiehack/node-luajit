@@ -8,6 +8,7 @@
 
 #include "MyLuaState.hpp"
 #include "MyLuaWorker.hpp"
+#include "utils.h"
 
 using v8::Function;
 using v8::Local;
@@ -37,6 +38,9 @@ MyLuaState::~MyLuaState() {
 
 void MyLuaState::normalCallBack(Nan::Callback* cb,MyLuaWorker* worker){
     HandleScope scope;
+    if(!cb){
+        return;
+    }
     auto ret = worker->getUserData();
     v8::Local<v8::Value> err;
     v8::Local<v8::Value> arg2;
@@ -54,6 +58,51 @@ void MyLuaState::normalCallBack(Nan::Callback* cb,MyLuaWorker* worker){
 }
 
 
+// worker->userParam = obj; 要设置成 MyLuaState 实例
+void MyLuaState::normalGetRetCallBack(Nan::Callback* cb,MyLuaWorker* worker){
+    HandleScope scope;
+    if(!cb){
+        return;
+    }
+    auto ret = worker->getUserData();
+    v8::Local<v8::Value> err;
+    if(ret.hasErr){
+        v8::Local<v8::Value> arg2;
+        err = Nan::New(ret.buff).ToLocalChecked();
+        arg2 = Nan::Undefined();
+        v8::Local<v8::Value> argv[] = {
+            err,arg2
+        };
+        cb->Call(2, argv);
+    }else{
+        MyLuaState* obj = (MyLuaState*)worker->userParam;
+        err = Nan::Null();
+        auto L = obj->getLuaState();
+        int len = lua_gettop(L);
+        if(len){
+            //lua_to_value
+            v8::Local<v8::Value> *argv  = new v8::Local<v8::Value>[len+1];
+            argv[0] = Nan::Null();
+            int i = 1;
+            while (i<=len) {
+                argv[i] = lua_to_value(L, -1);
+                i++;
+                lua_pop(L,1);
+            }
+            cb->Call(len+1, argv);
+            delete []argv;
+        }else{
+            v8::Local<v8::Value> argv[] = {
+                err,Nan::New(ret.buff).ToLocalChecked()
+            };
+            cb->Call(2, argv);
+        }
+    }
+
+    
+}
+
+
 
 void MyLuaState::Init(v8::Local<v8::Object> exports) {
     Nan::HandleScope scope;
@@ -65,6 +114,7 @@ void MyLuaState::Init(v8::Local<v8::Object> exports) {
     
     // Prototype
     Nan::SetPrototypeMethod(tpl, "doFile", DoFile);
+    Nan::SetPrototypeMethod(tpl, "doString", DoString);
     
     constructor.Reset(tpl->GetFunction());
     exports->Set(Nan::New("MyLuaState").ToLocalChecked(), tpl->GetFunction());
@@ -130,11 +180,20 @@ void MyLuaState::DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info){
         auto L = obj->getLuaState();
   //      printf("worker int:%p\n",nfn);
   //      printf("begin do file :%s\n",nfn);
+        int top = lua_gettop(L);
+  //      printf("top:%d  111str :%s\n",top,nfn);
         auto hasErr = luaL_dofile(L, nfn);
+        top = lua_gettop(L);
+   //     printf("top:%d  2222str :%s\n",top,nfn);
         if(hasErr){
             worker->setUserData(true,lua_tostring(L, -1));
+            lua_pop(L, 1);
         }else{
-            worker->setUserData(false,"");
+            const char * buff = nullptr;
+            if(lua_gettop(L)){
+                buff = lua_tostring(L, -1);
+            }
+            worker->setUserData(false,buff);
         }
   //      printf("do file  end:%s\n",(char*)nfn);
         //要释放 fn
@@ -144,6 +203,62 @@ void MyLuaState::DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info){
     obj->workerQueue.addQueue(worker);
     info.GetReturnValue().Set(Nan::Undefined());
 }
+
+
+
+
+
+void MyLuaState::DoString(const Nan::FunctionCallbackInfo<v8::Value>& info){
+    if(info.Length()<1){
+        Nan::ThrowTypeError("Wrong number of arguments");
+        return;
+    }
+    if(!info[0]->IsString()){
+        Nan::ThrowTypeError("arg 1 is not a string  need filepath");
+        return;
+    }
+    if(info.Length() > 1 && !info[1]->IsFunction()){
+        Nan::ThrowTypeError("arg 2 is not a function ");
+        return;
+    }
+    //可能要copy出来
+    v8::String::Utf8Value filename(info[0]->ToString());
+    const char* fn = *filename;
+    char* nfn = new char[filename.length()+1];
+    //   printf(" fnfnfnfnfn :%s\n",fn);
+    strcpy(nfn,fn);
+    //    printf(" fnfnfnfnfn1111 :%s\n",nfn);
+    MyLuaState* obj = ObjectWrap::Unwrap<MyLuaState>(info.This());
+    Nan::Callback *callback = nullptr;
+    if(info.Length()>1){
+        callback = new Nan::Callback(info[1].As<Function>());
+    }
+    
+    MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
+        auto L = obj->getLuaState();
+        //      printf("worker int:%p\n",nfn);
+        //      printf("begin do file :%s\n",nfn);
+        int top = lua_gettop(L);
+    //    printf("top:%d  str :%s\n",top,nfn);
+        auto hasErr = luaL_dostring(L, nfn);
+        top = lua_gettop(L);
+  //      printf("top:%d \n",top);
+        if(hasErr){
+            worker->setUserData(true,lua_tostring(L, -1));
+        }else{
+            worker->setUserData(false,"");
+        }
+        //      printf("do file  end:%s\n",(char*)nfn);
+        //要释放 fn
+        delete []nfn;
+    },normalGetRetCallBack);
+    worker->userParam = obj;
+    //   printf("worker out:%p\n",nfn);
+    obj->workerQueue.addQueue(worker);
+    info.GetReturnValue().Set(Nan::Undefined());
+}
+
+
 
 
 

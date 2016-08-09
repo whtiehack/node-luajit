@@ -35,10 +35,13 @@ private:
 
     static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
     static void DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info);
+    static void DoString(const Nan::FunctionCallbackInfo<v8::Value>& info);
+    
     MyWorkerQueue workerQueue;
     
     
     static void normalCallBack(Nan::Callback* cb,MyLuaWorker* worker);
+    static void normalGetRetCallBack(Nan::Callback* cb,MyLuaWorker* worker);
 };
 
 #endif /* MyLuaState_hpp */

@@ -1,6 +1,6 @@
 'use strict';
 var nodelua = null;
-
+var path = require('path');
 try{
     nodelua = require('./build/Release/node-luajit');
 }catch(e){
@@ -14,18 +14,27 @@ if(!nodelua){
     return;
 }
 var MyLua = function(){
-    this.lua = new MyCLua();
+    var self = this;
+    self.lua = new MyCLua();
     //init path
-    
+    var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so';
+    self.lua.doString('package.cpath = package.cpath .. "'+paths+'";',function(err,ret){
+     //   console.log('  package path:',err,ret);
+    });
+ //   self.lua.doString("print(package.path)")
 };
 
 var prop = MyLua.prototype;
 
 
 prop.doFile = function(fn,cb){
-    this.lua.doFile(fn,cb)
+    this.lua.doFile(fn,cb);
 };
 
+
+prop.doString = function(str,cb){
+    this.lua.doString(str,cb);
+};
 
 MyLua.GC = nodelua.GC;
 MyLua.STATUS = nodelua.STATUS;

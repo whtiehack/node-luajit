@@ -53,22 +53,22 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
     init_gc_constants(exports);
     init_status_constants(exports);
     init_info_constants(exports);
-    printf("showshowshow ``` \n");
-    auto L = luaL_newstate();
-    if(L){
-        char buf[80];
-        getcwd(buf,sizeof(buf));
-        printf("havahave  have2222\n");
-        printf("cwd:%s\n",buf);
-        luaL_openlibs(L);
-        auto ret = luaL_dostring(L,"print('path:' .. package.path);");
-        if(ret){
-            printf("err:%s\n",lua_tostring(L,-1));
-        }
-        lua_close(L);
-    }else{
-        printf("not not not \n");
-    }
+    printf("node-lua loaded\n");
+//    auto L = luaL_newstate();
+//    if(L){
+//        char buf[80];
+//        getcwd(buf,sizeof(buf));
+//        printf("havahave  have2222\n");
+//        printf("cwd:%s\n",buf);
+//        luaL_openlibs(L);
+//        auto ret = luaL_dostring(L,"print('path:' .. package.path);");
+//        if(ret){
+//            printf("err:%s\n",lua_tostring(L,-1));
+//        }
+//        lua_close(L);
+//    }else{
+//        printf("not not not \n");
+//    }
     
 }
 NODE_MODULE(nodelua, init)
