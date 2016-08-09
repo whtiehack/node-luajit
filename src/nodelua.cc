@@ -4,6 +4,7 @@
 
 #include "luastate.h"
 #include <unistd.h>
+#include "MyLuaState.hpp"
 
 extern "C"{
 #include <lua.h>
@@ -48,9 +49,10 @@ void init_gc_constants(Handle<Object> target){
 
 void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
 //  LuaState::Init(exports);
-  init_gc_constants(exports);
-  init_status_constants(exports);
-  init_info_constants(exports);
+    MyLuaState::Init(exports);
+    init_gc_constants(exports);
+    init_status_constants(exports);
+    init_info_constants(exports);
     printf("showshowshow ``` \n");
     auto L = luaL_newstate();
     if(L){

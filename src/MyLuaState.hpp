@@ -18,6 +18,8 @@ extern "C"{
 #include <lualib.h>
 }
 
+#include "MyWorkerQueue.hpp"
+
 class MyLuaState : public Nan::ObjectWrap {
 public:
     static void Init(v8::Local<v8::Object> exports);
@@ -33,6 +35,10 @@ private:
 
     static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
     static void DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info);
+    MyWorkerQueue workerQueue;
+    
+    
+    static void normalCallBack(Nan::Callback* cb,MyLuaWorker* worker);
 };
 
 #endif /* MyLuaState_hpp */
