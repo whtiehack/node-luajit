@@ -14,6 +14,7 @@ function print(...)
     oriPrint('lua:',...)
 end
 cjson = require("cjson"); 
+return {1,2,3}
 `,function(err,ret){
     console.log('dostr test :',err,ret);
 });
@@ -24,7 +25,3 @@ lua.doFile(__dirname+'/luatest.lua',function(err,ret){
 });
 
 
-
-setTimeout(function(){
-    console.log('eddd');
-},2000);
