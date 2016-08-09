@@ -92,7 +92,8 @@
         "src/luastate.cc",
         "src/nodelua.cc",
         "src/MyLuaWorker.cpp",
-        "src/MyWorkerQueue.cpp"
+        "src/MyWorkerQueue.cpp",
+        "src/MyLuaState.cpp"
       ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")"

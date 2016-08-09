@@ -3,7 +3,11 @@
 #include <nan.h>
 
 #include "luastate.h"
+#ifndef WIN32
 #include <unistd.h>
+#else
+//TODO
+#endif
 #include "MyLuaState.hpp"
 
 extern "C"{
