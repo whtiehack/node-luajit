@@ -9,3 +9,4 @@
 print('hello lua!! version:' .. _VERSION);
 
 
+print('cjson:',cjson.encode({5,6,7}))
