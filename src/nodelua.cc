@@ -53,12 +53,19 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
     printf("showshowshow ``` \n");
     auto L = luaL_newstate();
     if(L){
-        printf("havahave  have\n");
+        char buf[80];
+        getcwd(buf,sizeof(buf));
+        printf("havahave  have2222\n");
+        printf("cwd:%s\n",buf);
         luaL_openlibs(L);
-        luaL_dostring(L,"print(222222)");
+        auto ret = luaL_dostring(L,"print('path:' .. package.path);");
+        if(ret){
+            printf("err:%s\n",lua_tostring(L,-1));
+        }
+        lua_close(L);
     }else{
         printf("not not not \n");
     }
-
+    
 }
 NODE_MODULE(nodelua, init)
