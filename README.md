@@ -5,10 +5,10 @@ similar as `https://github.com/brettlangdon/NodeLua`
 
 ## feature
 
-> nodejs -> lua  is async.
-> nodejs -> lua  in queue, so lua internal is sync.
-> all luaState  are independent.
-> now lua can't call nodejs direct.
+1. nodejs -> lua  is async.
+2. nodejs -> lua  in queue, so lua internal is sync.
+3. all luaState  are independent.
+4. now lua can't call nodejs direct.
 
 
 
@@ -30,6 +30,10 @@ lua.doFile(__dirname+'/test/luatest.lua',function(err,ret){
 
 
 
+lua.callGlobalFunction('print',11,22,function(err,ret){
+    console.log('callGlobalFunction!!:',err,ret);
+})
+
 var lua1 = new MyLua();
 var lua2 = new MyLua();
 
@@ -50,6 +54,9 @@ lua1.doFile(__dirname+'/luatest.lua',function(err,ret){
 lua2.doFile(__dirname+'/luatest.lua',function(err,ret){
     console.log('lua2 doFile ret:',err,ret)
 });
+
+
+
 
 
 ```
