@@ -13,13 +13,28 @@ var MyCLua = nodelua.MyLuaState;
 if(!nodelua){
     return;
 }
-var MyLua = function(){
+var singleIdx = 0;
+var MyLua = function(formatprint,loadcjson){
+    if(typeof(formatprint)== 'undefined'){
+        formatprint = true;
+    }
+    if(typeof(loadcjson)=='undefined'){
+        loadcjson = true;
+    }
+    singleIdx++;
     var self = this;
     self.lua = new MyCLua();
     //init path
     var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so';
     var luapaths = ';'+__dirname+'/?.lua;'+__dirname+'/test/?.lua;'+process.cwd()+'/?.lua';
-    self.lua.doString('package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";',function(err,ret){
+    var luastr  = 'package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";LUASINGLEIDX = '+singleIdx+';';;
+    if(formatprint){
+        luastr += 'require("initlua.formatPrint");';
+    }
+    if(loadcjson){
+        luastr += 'cjson = require("cjson")';
+    }
+    self.lua.doString(luastr,function(err,ret){
      //   console.log('  package path:',err,ret);
         if(err){
             console.log('!!add find pash err:',err);
@@ -38,6 +53,23 @@ prop.doFile = function(fn,cb){
 
 prop.doString = function(str,cb){
     this.lua.doString(str,cb);
+};
+
+/**
+ * cb(null,status)
+ * @param cb
+ */
+prop.status = function(cb){
+    this.lua.status(cb);
+};
+
+prop.addPachagePath = function(path,isC){
+    var luavar = 'package.path';
+    if(isC){
+        luavar = 'package.cpath';
+    }
+    var luastr  = luavar +' = ' + luavar+' .. ";' + path + '";';
+    this.lua.doString(luastr);
 };
 
 MyLua.GC = nodelua.GC;
