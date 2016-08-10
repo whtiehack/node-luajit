@@ -206,8 +206,8 @@ void MyLuaState::DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info){
         delete []nfn;
     },normalCallBack);
  //   printf("worker out:%p\n",nfn);
-    obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::Undefined());
+    int nowqueue = obj->workerQueue.addQueue(worker);
+    info.GetReturnValue().Set(Nan::New(nowqueue));
 }
 
 
@@ -261,8 +261,8 @@ void MyLuaState::DoString(const Nan::FunctionCallbackInfo<v8::Value>& info){
     },normalGetRetCallBack);
     worker->userParam = obj;
     //   printf("worker out:%p\n",nfn);
-    obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::Undefined());
+    int nowqueue = obj->workerQueue.addQueue(worker);
+    info.GetReturnValue().Set(Nan::New(nowqueue));
 }
 
 
@@ -291,8 +291,8 @@ void MyLuaState::Status(const Nan::FunctionCallbackInfo<v8::Value>& info){
         };
         cb->Call(2, argv);
     });
-    obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::Undefined());
+    int nowqueue = obj->workerQueue.addQueue(worker);
+    info.GetReturnValue().Set(Nan::New(nowqueue));
 
 }
 
@@ -447,8 +447,8 @@ void MyLuaState::CallGlobalFunction(const Nan::FunctionCallbackInfo<v8::Value>& 
         delete []functionName;
     },normalGetRetCallBack);
     worker->userParam = obj;
-    obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::Undefined());
+    int nowqueue = obj->workerQueue.addQueue(worker);
+    info.GetReturnValue().Set(Nan::New(nowqueue));
     
 }
 

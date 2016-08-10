@@ -47,12 +47,12 @@ var prop = MyLua.prototype;
 
 
 prop.doFile = function(fn,cb){
-    this.lua.doFile(fn,cb);
+    return this.lua.doFile(fn,cb);
 };
 
 
 prop.doString = function(str,cb){
-    this.lua.doString(str,cb);
+    return this.lua.doString(str,cb);
 };
 
 /**
@@ -60,7 +60,7 @@ prop.doString = function(str,cb){
  * @param cb
  */
 prop.status = function(cb){
-    this.lua.status(cb);
+    return this.lua.status(cb);
 };
 
 prop.addPachagePath = function(path,isC){
@@ -69,15 +69,16 @@ prop.addPachagePath = function(path,isC){
         luavar = 'package.cpath';
     }
     var luastr  = luavar +' = ' + luavar+' .. ";' + path + '";';
-    this.lua.doString(luastr);
+    return this.lua.doString(luastr);
 };
 
 /**
  *  call(funname[,args][,cb])  cb(err,ret)
  * @param funName
+ * @returns {number}
  */
 prop.callGlobalFunction = function(funName){
-    this.lua.callGlobalFunction.apply(this.lua,arguments);
+    return this.lua.callGlobalFunction.apply(this.lua,arguments);
 };
 
 MyLua.GC = nodelua.GC;
