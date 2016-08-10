@@ -87,10 +87,10 @@ void MyLuaState::normalGetRetCallBack(Nan::Callback* cb,MyLuaWorker* worker){
             argv[0] = Nan::Null();
             int i = 1;
             while (i<=len) {
-                argv[i] = lua_to_value(L, -1);
+                argv[i] = lua_to_value(L, i);
                 i++;
-                lua_pop(L,1);
             }
+            lua_settop(L, worker->getUserData().customVal);
             cb->Call(len+1, argv);
             delete []argv;
         }else{

@@ -50,8 +50,8 @@ co(function*() {
 
 
     yield (done)=>{
-        lua.callGlobalFunction('print',11,22,function(err,ret){
-            console.log('callGlobalFunction!!:',err,ret);
+        lua.callGlobalFunction('testArgAndRetGlobalCall',11,22,function(err,ret,ret2){
+            console.log('callGlobalFunction!!:',err,ret,ret2);
             done();
         })
     };

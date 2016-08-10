@@ -10,3 +10,9 @@ print('hello lua!! version:' .. _VERSION);
 
 
 print('cjson:',cjson.encode({5,6,7}))
+
+
+function testArgAndRetGlobalCall(arg1,arg2)
+    print('testArgAndRetGlobalCall',arg1,arg2)
+    return arg1 .. arg2,'fdafd';
+end
