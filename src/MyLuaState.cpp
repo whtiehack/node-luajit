@@ -319,7 +319,7 @@ struct Prams{
 
 
 
-char* getValStr(v8::Local<v8::Value>& val){
+char* getValStr(v8::Local<v8::Value> val){
     if(!val->IsString()){
         return NULL;
     }
@@ -332,7 +332,6 @@ char* getValStr(v8::Local<v8::Value>& val){
 void transVal(v8::Local<v8::Value> value,Prams* nowVal){
     if (value->IsString()){
         nowVal->type = Prams::ParmType::STRING;
-        strcpy(nowVal->valStr, get_str(value->ToString()));
         nowVal->valStr = getValStr(value);
     }else if(value->IsNumber()){
         double i_value = value->ToNumber()->Value();
@@ -342,7 +341,6 @@ void transVal(v8::Local<v8::Value> value,Prams* nowVal){
         nowVal->valBool = (int)value->ToBoolean()->Value();
         nowVal->type = Prams::BOOLEAN;
     }else if(value->IsObject()){
-        
         v8::Local<v8::Object> obj = value->ToObject();
         v8::Local<v8::Array> keys = obj->GetPropertyNames();
         nowVal->type = Prams::TABLE;
