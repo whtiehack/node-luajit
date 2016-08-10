@@ -72,6 +72,14 @@ prop.addPachagePath = function(path,isC){
     this.lua.doString(luastr);
 };
 
+/**
+ *  call(funname[,args][,cb])  cb(err,ret)
+ * @param funName
+ */
+prop.callGlobalFunction = function(funName){
+    this.lua.callGlobalFunction.apply(this.lua,arguments);
+};
+
 MyLua.GC = nodelua.GC;
 MyLua.STATUS = nodelua.STATUS;
 MyLua.INFO = nodelua.INFO;

@@ -33,6 +33,7 @@ public:
     struct UserDatas{
         bool hasErr = false;
         char buff[512];
+        int customVal= 0;
         
     };
     // Executed when the async work is complete

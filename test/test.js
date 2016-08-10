@@ -48,7 +48,15 @@ co(function*() {
     console.log('file:',file.toString().split('\n')[0]);
     console.timeEnd('fs1');
 
+
+    yield (done)=>{
+        lua.callGlobalFunction('print',11,22,function(err,ret){
+            console.log('callGlobalFunction!!:',err,ret);
+            done();
+        })
+    };
     testAsyncAndSingle();
+
 }).catch((err)=>{
     console.log('!! test err:',err);
 });
