@@ -1,8 +1,21 @@
 {
   "name": "node-luajit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "luajit node binding",
   "main": "index.js",
+  "homepage": "https://github.com/whtiehack/node-luajit",
+  "repository": {
+    "type":"git",
+    "url":"git@github.com:whtiehack/node-luajit.git"
+  },
+  "keywords": [
+    "lua",
+    "luajit",
+    "nodejs",
+    "addon",
+    "cjson",
+    "lua51"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

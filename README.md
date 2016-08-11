@@ -1,5 +1,5 @@
 ## Node-luajit binding
-
+#### Cross platform.  (win,mac,linux)[x64]
 similar as `https://github.com/brettlangdon/NodeLua`
 
 
@@ -14,7 +14,7 @@ similar as `https://github.com/brettlangdon/NodeLua`
 
 ## simple usage
 
-```
+```js
 var MyLua = require('node-luajit');
 var lua = new MyLua();
 
@@ -54,7 +54,6 @@ lua1.doFile(__dirname+'/luatest.lua',function(err,ret){
 lua2.doFile(__dirname+'/luatest.lua',function(err,ret){
     console.log('lua2 doFile ret:',err,ret)
 });
-
 
 
 
