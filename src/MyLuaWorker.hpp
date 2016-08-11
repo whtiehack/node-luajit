@@ -32,7 +32,8 @@ public:
     void Execute ();
     struct UserDatas{
         bool hasErr = false;
-        char buff[512];
+        char buff[3024];
+        int customVal= 0;
         
     };
     // Executed when the async work is complete

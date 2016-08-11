@@ -58,6 +58,7 @@ void init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
     init_status_constants(exports);
     init_info_constants(exports);
     printf("node-lua loaded\n");
+    fflush(stdout);
 //    auto L = luaL_newstate();
 //    if(L){
 //        char buf[80];
