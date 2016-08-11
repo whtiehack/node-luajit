@@ -23,7 +23,7 @@ var MyLua = function(formatprint,loadcjson){
     }
     singleIdx++;
     var self = this;
-    self.lua = new MyCLua();
+    self.lua = new MyCLua(singleIdx);
     //init path
     var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so';
     var luapaths = ';'+__dirname+'/?.lua;'+__dirname+'/test/?.lua;'+process.cwd()+'/?.lua';

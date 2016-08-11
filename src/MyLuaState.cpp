@@ -33,7 +33,7 @@ MyLuaState::MyLuaState(double value) {
 }
 
 MyLuaState::~MyLuaState() {
-    printf("My LuaState ~~~ 析构");
+    printf("My LuaState ~~~ 析构 %f\n",_idVal);
     fflush(stdout);
     lua_close(_L);
 }
