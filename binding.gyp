@@ -17,7 +17,7 @@
               "D:\\Develop\\LuaJIT-2.0.3\\src"
             ],
             "libraries": [
-              "lua51.dll"
+              "lua51.lib"
             ],
             "actions": [
               {
@@ -32,6 +32,20 @@
                   'cp',
                   '<(module_root_dir)/cjsonlib/cjson.dll',
                   '<(module_root_dir)/build/Release/cjson.dll'
+                ]
+              },
+              {
+                'action_name': 'move_lua',
+                'inputs': [
+                  '<(module_root_dir)/win64luajit/lua51.dll'
+                ],
+                'outputs': [
+                  '<(module_root_dir)/build/Release/lua51.dll'
+                ],
+                'action': [
+                  'cp',
+                  '<(module_root_dir)/win64luajit/lua51.dll',
+                  '<(module_root_dir)/build/Release/lua51.dll'
                 ]
               }
             ],

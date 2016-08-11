@@ -25,19 +25,23 @@ var MyLua = function(formatprint,loadcjson){
     var self = this;
     self.lua = new MyCLua(singleIdx);
     //init path
-    var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so';
+    var paths = ';'+__dirname+'/?.so;'+__dirname+'/build/Release/?.so;'+__dirname+'/build/Release/?.dll';
     var luapaths = ';'+__dirname+'/?.lua;'+__dirname+'/test/?.lua;'+process.cwd()+'/?.lua';
-    var luastr  = 'package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";LUASINGLEIDX = '+singleIdx+';';;
+    var luastr  = 'package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";LUASINGLEIDX = '+singleIdx+';';
     if(formatprint){
         luastr += 'require("initlua.formatPrint");';
     }
     if(loadcjson){
-        luastr += 'cjson = require("cjson")';
+        luastr += 'cjson = require("cjson");';
+    }
+    if(process.platform=='win32'){
+        luastr = luastr.replace(new RegExp('\\\\','g'),'/');
     }
     self.lua.doString(luastr,function(err,ret){
      //   console.log('  package path:',err,ret);
         if(err){
             console.log('!!add find pash err:',err);
+            console.log('lua:',luastr);
         }
     });
  //   self.lua.doString("print(package.path)")
