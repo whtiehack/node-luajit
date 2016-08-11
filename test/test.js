@@ -5,7 +5,7 @@ console.timeEnd('luabegin');
 console.log('test');
 
 var co = require('co');
-
+testAsyncAndSingle();
 co(function*() {
     var lua = new MyLua();
     console.time('dostr');
@@ -55,7 +55,7 @@ co(function*() {
             done();
         })
     };
-    testAsyncAndSingle();
+
 
 }).catch((err)=>{
     console.log('!! test err:',err);
