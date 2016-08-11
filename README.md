@@ -11,6 +11,10 @@ similar as `https://github.com/brettlangdon/NodeLua`
 4. now lua can't call nodejs direct.
 
 
+##Installation
+
+`npm install node-luajit`
+
 
 ## simple usage
 
