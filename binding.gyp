@@ -11,10 +11,10 @@
           "OS=='win'",
           {
             "include_dirs": [
-              "D:\\Develop\\LuaJIT-2.0.3\\src"
+              "./win64luajit"
             ],
             "library_dirs": [
-              "D:\\Develop\\LuaJIT-2.0.3\\src"
+              "./win64luajit"
             ],
             "libraries": [
               "lua51.lib"
