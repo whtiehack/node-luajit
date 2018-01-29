@@ -1,6 +1,6 @@
 {
   "name": "node-luajit",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "luajit node binding",
   "main": "index.js",
   "homepage": "https://github.com/whtiehack/node-luajit",
@@ -23,11 +23,9 @@
   "author": "smallwhite",
   "license": "ISC",
   "dependencies": {
-    "nan": "*",
-    "shelljs": "^0.8.1"
+    "nan": "*"
   },
   "devDependencies": {
-    "@types/shelljs": "^0.7.7",
     "co": "^4.6.0"
   }
 }
