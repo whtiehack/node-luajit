@@ -14,6 +14,11 @@ similar as `https://github.com/brettlangdon/NodeLua`
 ##Installation
 
 `npm install node-luajit`
+```
+// some times maybe need 
+npm install node-luajit --unsafe-perm
+
+```
 
 
 ## simple usage

@@ -90,26 +90,26 @@
           'OS=="linux"',
           {
             "include_dirs": [
-              "<(module_root_dir)/3rdlibs/LuaJIT-2.1.0-beta3/src"
+              "<(module_root_dir)/3rdlibs/LuaJIT/src"
             ],
             "library_dirs": [
               "/usr/local/lib"
             ],
             "libraries": [
-              "<(module_root_dir)/3rdlibs/LuaJIT-2.1.0-beta3/src/libluajit.so"
+              "<(module_root_dir)/3rdlibs/LuaJIT/src/libluajit.so"
             ],
             "actions": [
               {
                 'action_name': 'move_cjson',
                 'inputs': [
-                  '<(module_root_dir)/cjsonlib/linux_cjson.so'
+                  '<(module_root_dir)/3rdlibs/lua-cjson/cjson.so'
                 ],
                 'outputs': [
                   '<(module_root_dir)/build/Release/cjson.so'
                 ],
                 'action': [
                   'cp',
-                  '<(module_root_dir)/cjsonlib/linux_cjson.so',
+                  '<(module_root_dir)/3rdlibs/lua-cjson/linux_cjson.so',
                   '<(module_root_dir)/build/Release/cjson.so'
                 ]
               }
