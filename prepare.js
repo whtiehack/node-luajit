@@ -31,7 +31,8 @@ if(shell.test('-d',luajitname)){
 }
 
 shell.exec('wget '+ url + ' -O '+luajitname+'.tar.gz');
-shell.exec('tar -xf '+luajitname+'.tar.gz');
+shell.exec('mkdir '+luajitname);
+shell.exec('tar -xf '+luajitname+'.tar.gz --strip-components 1 -C ./'+luajitname);
 shell.rm(luajitname+'.tar.gz');
 shell.cd(luajitname);
 shell.exec('make');
