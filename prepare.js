@@ -6,7 +6,7 @@ const shell = require('shelljs');
 // (test -d 3rdlibs || mkdir 3rdlibs) && cd 3rdlibs && wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz && tar -xf LuaJIT-2.0.5.tar.gz
 
 const url = 'http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz';
-const cjsonurl = 'https://github.com/mpx/lua-cjson/archive/master.zip';
+const cjsonurl = 'https://github.com/openresty/lua-cjson/archive/master.zip';
 const cjsonname = 'lua-cjson';
 const luajitname = 'LuaJIT';
 const os = require('os');
@@ -22,6 +22,9 @@ if(os.platform()!=='linux'){
 }
 if(!shell.test('-d','3rdlibs')){
     shell.mkdir('3rdlibs');
+}else{
+    shell.rm('-rf','3rdlibs/'+luajitname);
+    shell.rm('-rf','3rdlibs/'+cjsonname);
 }
 
 shell.cd('3rdlibs');
