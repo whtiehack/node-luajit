@@ -30,7 +30,7 @@ if(shell.test('-d',luajitname)){
     return 0;
 }
 
-shell.exec('wget '+ url + ' -O '+luajitname+'tar.gz');
+shell.exec('wget '+ url + ' -O '+luajitname+'.tar.gz');
 shell.exec('tar -xf '+luajitname+'.tar.gz');
 shell.rm(luajitname+'.tar.gz');
 shell.cd(luajitname);
