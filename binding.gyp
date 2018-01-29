@@ -109,7 +109,7 @@
                 ],
                 'action': [
                   'cp',
-                  '<(module_root_dir)/3rdlibs/lua-cjson/linux_cjson.so',
+                  '<(module_root_dir)/3rdlibs/lua-cjson/cjson.so',
                   '<(module_root_dir)/build/Release/cjson.so'
                 ]
               }
