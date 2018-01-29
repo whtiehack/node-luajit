@@ -43,8 +43,8 @@ shell.cd('..');
 shell.exec('wget ' + cjsonurl + ' -O '+ cjsonname +'.zip');
 shell.exec('unzip -d '+ cjsonname+ ' -j '+ cjsonname +'.zip');
 shell.rm(cjsonname+'.zip');
-shell.cd(cjsonname);
-shell.exec('make LUA_INCLUDE_DIR="../'+luajitname+'/src" LUA_BIN_DIR="../'+ luajitname+'/src" LUA_CMODULE_DIR="../' + luajitname+'/src" LUA_MODULE_DIR="../'+luajitname+'/src"');
+//shell.cd(cjsonname);
+//shell.exec('make LUA_INCLUDE_DIR="../'+luajitname+'/src" LUA_BIN_DIR="../'+ luajitname+'/src" LUA_CMODULE_DIR="../' + luajitname+'/src" LUA_MODULE_DIR="../'+luajitname+'/src"');
 if(os.platform() !== 'win32'){
   //  shell.exec('sudo make install');
 }

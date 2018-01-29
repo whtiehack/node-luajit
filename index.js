@@ -14,12 +14,9 @@ if(!nodelua){
     return;
 }
 var singleIdx = 0;
-var MyLua = function(formatprint,loadcjson){
+var MyLua = function(formatprint){
     if(typeof(formatprint)== 'undefined'){
         formatprint = true;
-    }
-    if(typeof(loadcjson)=='undefined'){
-        loadcjson = true;
     }
     singleIdx++;
     var self = this;
@@ -30,9 +27,6 @@ var MyLua = function(formatprint,loadcjson){
     var luastr  = 'package.cpath = package.cpath .. "'+paths+'";package.path = package.path .. "'+luapaths+'";LUASINGLEIDX = '+singleIdx+';';
     if(formatprint){
         luastr += 'require("initlua.formatPrint");';
-    }
-    if(loadcjson){
-        luastr += 'cjson = require("cjson");';
     }
     if(process.platform=='win32'){
         luastr = luastr.replace(new RegExp('\\\\','g'),'/');

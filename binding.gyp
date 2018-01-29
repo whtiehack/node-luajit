@@ -21,20 +21,6 @@
             ],
             "actions": [
               {
-                'action_name': 'move_cjson',
-                'inputs': [
-                  '<(module_root_dir)/cjsonlib/cjson.dll'
-                ],
-                'outputs': [
-                  '<(module_root_dir)/build/Release/cjson.dll'
-                ],
-                'action': [
-                  'cp',
-                  '<(module_root_dir)/cjsonlib/cjson.dll',
-                  '<(module_root_dir)/build/Release/cjson.dll'
-                ]
-              },
-              {
                 'action_name': 'move_lua',
                 'inputs': [
                   '<(module_root_dir)/win64luajit/lua51.dll'
@@ -61,20 +47,6 @@
               "<(module_root_dir)/maclualib/lib/liblua.a"
             ],
             "actions": [
-              {
-                'action_name': 'move_cjson',
-                'inputs': [
-                  '<(module_root_dir)/cjsonlib/mac_cjson.so'
-                ],
-                'outputs': [
-                  '<(module_root_dir)/build/Release/cjson.so'
-                ],
-                'action': [
-                  'cp',
-                  '<(module_root_dir)/cjsonlib/mac_cjson.so',
-                  '<(module_root_dir)/build/Release/cjson.so'
-                ]
-              }
             ],
             "cflags": [
               "-std=c++11",
@@ -93,26 +65,12 @@
               "<(module_root_dir)/3rdlibs/LuaJIT/src"
             ],
             "library_dirs": [
-              "/usr/local/lib"
+              "<(module_root_dir)/3rdlibs/LuaJIT/src"
             ],
             "libraries": [
               "<(module_root_dir)/3rdlibs/LuaJIT/src/libluajit.so"
             ],
             "actions": [
-              {
-                'action_name': 'move_cjson',
-                'inputs': [
-                  '<(module_root_dir)/3rdlibs/lua-cjson/cjson.so'
-                ],
-                'outputs': [
-                  '<(module_root_dir)/build/Release/cjson.so'
-                ],
-                'action': [
-                  'cp',
-                  '<(module_root_dir)/3rdlibs/lua-cjson/cjson.so',
-                  '<(module_root_dir)/build/Release/cjson.so'
-                ]
-              }
             ]
           }
         ]
@@ -123,7 +81,10 @@
         "src/nodelua.cc",
         "src/MyLuaWorker.cpp",
         "src/MyWorkerQueue.cpp",
-        "src/MyLuaState.cpp"
+        "src/MyLuaState.cpp",
+        "3rdlibs/lua-cjson/fpconv.c",
+        "3rdlibs/lua-cjson/lua_cjson.c",
+        "3rdlibs/lua-cjson/strbuf.c"
       ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")"

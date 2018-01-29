@@ -25,11 +25,19 @@ using Nan::To;
 
 Nan::Persistent<v8::Function> MyLuaState::constructor;
 
+extern "C"{
+ int luaopen_cjson(lua_State *l);
+}
 
 MyLuaState::MyLuaState(double value) {
     _idVal = value;
     _L = lua_open();
+    int top = lua_gettop(_L);
     luaL_openlibs(_L);
+    luaopen_cjson(_L);
+    lua_pushvalue(_L, -1);
+    lua_setglobal(_L, "cjson");
+    lua_settop(_L, top);
 }
 
 MyLuaState::~MyLuaState() {
