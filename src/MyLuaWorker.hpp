@@ -25,15 +25,17 @@ public:
     MyLuaWorker(Nan::Callback *callback,WorkerCall workerCall,FinishCallBack finishCb) :
         Nan::AsyncWorker(callback),userParam(nullptr),_finishCb(finishCb),_workerCall(workerCall)
     {
+        _userData.hasErr = false;
+        _userData.customVal = 0;
         _userData.buff[0] = 0;
     }
     ~MyLuaWorker(){}
     
     void Execute ();
     struct UserDatas{
-        bool hasErr = false;
+        bool hasErr;
         char buff[3024];
-        int customVal= 0;
+        int customVal;
         
     };
     // Executed when the async work is complete
