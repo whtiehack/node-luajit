@@ -55,10 +55,10 @@
           'OS=="mac"',
           {
             "include_dirs": [
-              "./maclualib/include"
+              "<(module_root_dir)/maclualib/include"
             ],
             "libraries": [
-              "../maclualib/lib/liblua.a"
+              "<(module_root_dir)/maclualib/lib/liblua.a"
             ],
             "actions": [
               {
@@ -90,13 +90,13 @@
           'OS=="linux"',
           {
             "include_dirs": [
-              "<!(find /usr/include /usr/local/include $NODELUA_INCLUDE -name lua.h | sed s/lua.h//)"
+              "<(module_root_dir)/3rdlibs/LuaJIT-2.1.0-beta3/src"
             ],
             "library_dirs": [
               "/usr/local/lib"
             ],
             "libraries": [
-              "/usr/local/lib/libluajit-5.1.so.2.0.4"
+              "<(module_root_dir)/3rdlibs/LuaJIT-2.1.0-beta3/src/libluajit.so"
             ],
             "actions": [
               {
