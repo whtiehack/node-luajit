@@ -145,7 +145,7 @@ void MyLuaState::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         const int argc = 1;
         v8::Local<v8::Value> argv[argc] = { info[0] };
         v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-        info.GetReturnValue().Set(cons->NewInstance(argc, argv));
+        info.GetReturnValue().Set(cons->NewInstance(info.GetIsolate()->GetCurrentContext(), argc, argv).ToLocalChecked());
     }
 }
 
@@ -158,7 +158,8 @@ v8::Local<v8::Object> MyLuaState::NewInstance(v8::Local<v8::Value> arg) {
     const unsigned argc = 1;
     v8::Local<v8::Value> argv[argc] = { arg };
     v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    v8::Local<v8::Object> instance = cons->NewInstance(argc, argv);
+
+	v8::Local<v8::Object> instance = cons->NewInstance(v8::Isolate::GetCurrent()->GetCurrentContext() , argc, argv).ToLocalChecked();
     
     return scope.Escape(instance);
 }
@@ -342,7 +343,7 @@ void transVal(v8::Local<v8::Value> value,Prams* nowVal){
         nowVal->type = Prams::ParmType::STRING;
         nowVal->valStr = getValStr(value);
     }else if(value->IsNumber()){
-        double i_value = value->ToNumber()->Value();
+		double i_value = value->NumberValue();
         nowVal->type = Prams::NUMBER;
         nowVal->valNum = i_value;
     }else if(value->IsBoolean()){
