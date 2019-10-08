@@ -23,7 +23,7 @@
   "author": "smallwhite",
   "license": "ISC",
   "dependencies": {
-    "nan": "*"
+    "nan": "^2.14.0"
   },
   "devDependencies": {
     "co": "4.6.0"
