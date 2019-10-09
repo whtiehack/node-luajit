@@ -14,23 +14,23 @@
               "<(module_root_dir)/3rdlibs/LuaJIT/src"
             ],
             "library_dirs": [
-              "<(module_root_dir)/3rdlibs/LuaJIT/src"
+              "./win64luajit"
             ],
             "libraries": [
-              "<(module_root_dir)/3rdlibs/LuaJIT/src/lua51.lib"
+              "lua51.lib"
             ],
             "actions": [
               {
                 'action_name': 'move_lua',
                 'inputs': [
-                  '<(module_root_dir)/3rdlibs/LuaJIT/src/lua51.dll'
+                  '<(module_root_dir)/win64luajit/lua51.dll'
                 ],
                 'outputs': [
                   '<(module_root_dir)/build/Release/lua51.dll'
                 ],
                 'action': [
                   'copy',
-                  '<(module_root_dir)/3rdlibs/LuaJIT/src/lua51.dll',
+                  '<(module_root_dir)/win64luajit/lua51.dll',
                   '<(module_root_dir)/build/Release/lua51.dll'
                 ]
               }
