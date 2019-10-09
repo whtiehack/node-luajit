@@ -1,6 +1,6 @@
 {
   "name": "node-luajit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "luajit node binding",
   "main": "index.js",
   "homepage": "https://github.com/whtiehack/node-luajit",
