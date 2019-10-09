@@ -23,6 +23,8 @@ npm install node-luajit --unsafe-perm
 
 ```
 
+#### node 8.x 10.x: 
+In Linux, need add one line `/usr/local/lib` to ` /etc/ld.so.conf` file, and run `「/sbin/ldconfig –v」` refresh. 
 
 ## simple usage
 
