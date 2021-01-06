@@ -11,7 +11,7 @@ similar as `https://github.com/brettlangdon/NodeLua`
 4. now lua can't call nodejs direct.
 5. add,linux auto compile luajit.[2018-01-29] http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
 6. add, cjson compile and auto load.  [2018-01-29] https://github.com/openresty/lua-cjson/archive/master.zip
-7. >win64 need fix.
+7. > win64 need fix.
 
 
 ##Installation
@@ -89,4 +89,21 @@ lua2.doFile(__dirname+'/luatest.lua',function(err,ret){
 
 
 ```
+
+### development
+
+
+generate xcode project:
+
+`node-gyp configure --debug -- -f xcode`
+
+if got `TypeError: 'cmp' is an invalid keyword argument for sort()` error.
+
+
+use `python2` instead, such as  `PYTHON=/usr/bin/python node-gyp configure -- -f xcode`
+
+Now you should have a ./build/binding.xcodeproj which you can open. 
+
+Configure the executable of the project in Xcode as node and debug away :)
+
 
