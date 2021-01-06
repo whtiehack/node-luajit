@@ -84,6 +84,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     init_info_constants(env,exports);
     printf("node-lua loaded\n");
     fflush(stdout);
+    return exports;
 }
 
 NODE_API_MODULE(nodelua, InitAll)

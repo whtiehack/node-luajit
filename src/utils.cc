@@ -30,8 +30,8 @@ Napi::Value lua_to_value(Napi::Env env, lua_State* L, int i){
        Napi::Object obj = Napi::Object::New(env);
      lua_pushnil(L);
      while(lua_next(L, -2) != 0){
-	Napi::Value key = lua_to_value(L, -2);
-         Napi::Value value = lua_to_value(L, -1);
+	Napi::Value key = lua_to_value(env,L, -2);
+         Napi::Value value = lua_to_value(env,L, -1);
 	obj.Set(key, value);
 	lua_pop(L, 1);
      }

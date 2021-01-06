@@ -11,6 +11,6 @@ extern "C"{
 }
 
 char * get_str(Napi::Value val);
-Napi::Value lua_to_value(lua_State* L, int);
+Napi::Value lua_to_value(Napi::Env env,lua_State* L, int);
 void push_value_to_lua(lua_State* L, Napi::Value value);
 #endif

@@ -45,61 +45,59 @@ MyLuaState::~MyLuaState() {
     lua_close(_L);
 }
 
-void MyLuaState::normalCallBack(Napi::Function& cb,MyLuaWorker* worker){
-    if(!cb){
+void MyLuaState::normalCallBack(Napi::Function& _cb,MyLuaWorker* worker){
+    if(!_cb){
         return;
     }
-    Napi::HandleScope scope(cb.Env());
+    auto env = worker->Callback().Env();
+    // Napi::HandleScope scope(env);
     auto ret = worker->getUserData();
     Napi::Value err;
     Napi::Value arg2;
     if(ret.hasErr){
-        err = Napi::String::New(cb.Env(),ret.buff);
-        arg2 = cb.Env().Undefined();
+        err = Napi::String::New(env,ret.buff);
+        arg2 = env.Undefined();
     }else{
-        err = cb.Env().Null();
-        arg2 = Napi::String::New(cb.Env(),ret.buff);
+        err = env.Null();
+        arg2 = Napi::String::New(env,ret.buff);
     }
-
-    cb.Call(cb.Env().Global(),{err,arg2});
+    worker->Callback().Call({err,arg2});
 }
 
 
 // worker->userParam = obj; 要设置成 MyLuaState 实例
-void MyLuaState::normalGetRetCallBack(Napi::Function&  cb,MyLuaWorker* worker){
-    if(!cb){
+void MyLuaState::normalGetRetCallBack(Napi::Function&  ccx,MyLuaWorker* worker){
+    if(!ccx){
         return;
     }
-    Napi::HandleScope scope(cb.Env());
+    auto env = worker->Callback().Env();
+    // Napi::HandleScope scope(env);
     auto ret = worker->getUserData();
     Napi::Value err;
     if(ret.hasErr){
         Napi::Value arg2;
-        err = Napi::String::New(cb.Env(),ret.buff);
-        arg2 = cb.Env().Undefined();
-        cb.Call(cb.Env().Global(), {err,arg2});
+        err = Napi::String::New(env,ret.buff);
+        arg2 = env.Undefined();
+        worker->Callback().Call({err,arg2});
     }else{
         MyLuaState* obj = (MyLuaState*)worker->userParam;
-        err = cb.Env().Null();
+        err = env.Null();
         auto L = obj->getLuaState();
         int len = lua_gettop(L) - worker->getUserData().customVal;
         if(len){
             //lua_to_value
-            Napi::Value *argv  = new Napi::Value[len+1];
-            argv[0] = cb.Env().Null();
+            napi_value *argv  = new napi_value[len+1];
+            argv[0] = env.Null();
             int i = 1;
             while (i<=len) {
-                argv[i] = lua_to_value(L, i);
+                argv[i] = lua_to_value(env,L, i);
                 i++;
             }
             lua_settop(L, worker->getUserData().customVal);
-            cb.Call(cb.Env().Null(), size_t(len+1), (napi_value*)argv);
+            worker->Callback().Call(env.Null(), size_t(len+1), (napi_value*)argv);
             delete []argv;
         }else{
-            Napi::Value argv[] = {
-                err,Napi::String::New(cb.Env(),ret.buff)
-            };
-            cb.Call(size_t(2), (napi_value*)argv);
+            worker->Callback().Call({err,Napi::String::New(env,ret.buff)});
         }
     }
 
@@ -109,7 +107,7 @@ void MyLuaState::normalGetRetCallBack(Napi::Function&  cb,MyLuaWorker* worker){
 
 // exports.MyLuaState = class { constructor(id){},doFile,doString,status,callGlobalFunction, static New}
 Napi::Object MyLuaState::Init(Napi::Env env,Napi::Object exports) {
-    Napi::HandleScope scope(env);
+    // Napi::HandleScope scope(env);
     
     Napi::Function func = DefineClass(env, "MyLuaState", {
         InstanceMethod<&MyLuaState::DoFile>("doFile"),
@@ -186,19 +184,15 @@ Napi::Value MyLuaState::DoFile(const Napi::CallbackInfo& info){
             worker->setUserData(true,lua_tostring(L, -1));
             lua_pop(L, 1);
         }else{
-            const char * buff = nullptr;
-            if(lua_gettop(L) - worker->getUserData().customVal){
-                buff = lua_tostring(L, -1);
-                lua_pop(L,1);
-            }
-            worker->setUserData(false,buff);
+            worker->setUserData(false,"");
         }
   //      printf("do file  end:%s\n",(char*)nfn);
         //要释放 fn
         delete []nfn;
     },[=](Napi::Function& cb,MyLuaWorker* worker){
-        this->normalCallBack(cb, worker);
+        this->normalGetRetCallBack(cb, worker);
     });
+    worker->userParam = this;
  //   printf("worker out:%p\n",nfn);
     int nowqueue = this->workerQueue.addQueue(worker);
     return Napi::Number::New(env, nowqueue);
@@ -228,15 +222,16 @@ Napi::Value MyLuaState::DoString(const Napi::CallbackInfo& info){
     char* nfn = new char[filename.length()+1];
     //   printf(" fnfnfnfnfn :%s\n",fn);
     strcpy(nfn,fn);
-    //    printf(" fnfnfnfnfn1111 :%s\n",nfn);
+    // printf(" fnfnfnfnfn1111 :%s\n",nfn);
     Napi::Function callback;
     if(info.Length()>1){
         callback = info[1].As<Napi::Function>();
     }
     
     MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
+        // printf("DoString worker int:%p\n",nfn);
         auto L = this->getLuaState();
-        //      printf("worker int:%p\n",nfn);
+        //
         //      printf("begin do file :%s\n",nfn);
         int top = lua_gettop(L);
         worker->getUserData().customVal = top;
@@ -249,10 +244,11 @@ Napi::Value MyLuaState::DoString(const Napi::CallbackInfo& info){
         }else{
             worker->setUserData(false,"");
         }
-        //      printf("do file  end:%s\n",(char*)nfn);
-        //要释放 fn
+        // printf("DoString  end:%s\n",(char*)nfn);
+        // 要释放 fn
         delete []nfn;
     },[=](Napi::Function& cb,MyLuaWorker* worker){
+        // printf("DoString  callback\n");
         this->normalGetRetCallBack(cb, worker);
     });
     worker->userParam = this;
@@ -279,12 +275,10 @@ Napi::Value MyLuaState::Status(const Napi::CallbackInfo& info){
         int status = lua_status(L);
         worker->userParam = reinterpret_cast<void*>(status);
         worker->setUserData(false,"");
-    },[=](Napi::Function& cb,MyLuaWorker* worker){
+    },[=](Napi::Function& __cb,MyLuaWorker* worker){
+        auto env = worker->Callback().Env();
         long status = reinterpret_cast<long>(worker->userParam);
-        Napi::Value argv[] = {
-            env.Null(),Napi::Number::New(env, status)
-        };
-        cb.Call(env.Global(),size_t(2),(napi_value*)argv);
+        worker->Callback().Call({env.Null(),Napi::Number::New(env, status)});
     });
     int nowqueue = this->workerQueue.addQueue(worker);
     return Napi::Number::New(env, nowqueue);

@@ -31,7 +31,9 @@ public:
         _userData.customVal = 0;
         _userData.buff[0] = 0;
     }
-    ~MyLuaWorker(){}
+    ~MyLuaWorker(){
+    //    printf("~MyLuaWorker\n");
+    }
     
     void Execute ();
     struct UserDatas{
@@ -43,7 +45,7 @@ public:
     // Executed when the async work is complete
     // this function will be run inside the main event loop
     // so it is safe to use V8 again
-    void HandleOKCallback ();
+    void OnOK();
     
     void setQueueNotify(WorkerCall qn){
         _queueNotify = qn;

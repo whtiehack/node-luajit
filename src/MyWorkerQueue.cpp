@@ -18,7 +18,7 @@ int MyWorkerQueue::addQueue(MyLuaWorker* worker){
         popQueue();
     });
     popQueue();
-    return myqueue.size();
+    return (int)myqueue.size();
 }
 
 void MyWorkerQueue::popQueue(){
@@ -30,5 +30,6 @@ void MyWorkerQueue::popQueue(){
     myqueue.pop_back();
     
     // AsyncQueueWorker(worker);
+    // printf(" queue call worker\n");
     worker->Queue();
 }

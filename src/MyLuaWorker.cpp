@@ -18,11 +18,13 @@ void MyLuaWorker::Execute () {
 
 
 
-void MyLuaWorker::HandleOKCallback () {
-//    printf("WorkerCall  handle ok callback:%ld\n",time(0));
+void MyLuaWorker::OnOK () {
+    // printf("OnOK  handle ok callback:%ld\n",time(0));
     _finishCb(callback,this);
 //    printf("WorkerCall  handle ok callback end:%ld\n",time(0));
     _queueNotify(this);
+    // clear no need will delete by node
+    // delete this;
 //    Nan::HandleScope scope;
 //    
 //    Local<Value> argv[] = {
