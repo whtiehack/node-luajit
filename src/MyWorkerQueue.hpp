@@ -10,7 +10,7 @@
 #define MyWorkerQueue_hpp
 
 #include <stdio.h>
-#include <nan.h>
+#include <napi.h>
 #include <deque>
 class MyLuaWorker;
 

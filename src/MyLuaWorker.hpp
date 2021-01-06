@@ -10,21 +10,23 @@
 #define MyLuaWorker_hpp
 
 #include <stdio.h>
-#include <nan.h>
+#include <napi.h>
 #include <functional>
 class MyWorkerQueue;
 
 class MyLuaWorker;
 //typedef void(*FinishCallBack)(Nan::Callback *);
-typedef std::function<void(Nan::Callback *,MyLuaWorker* worker)> FinishCallBack;
+typedef std::function<void(Napi::Function&,MyLuaWorker* worker)> FinishCallBack;
 //typedef void(*WorkerCall)(void);
 typedef std::function<void(MyLuaWorker*)> WorkerCall;
 
-class MyLuaWorker : public Nan::AsyncWorker {
+class MyLuaWorker : public Napi::AsyncWorker {
 public:
-    MyLuaWorker(Nan::Callback *callback,WorkerCall workerCall,FinishCallBack finishCb) :
-        Nan::AsyncWorker(callback),userParam(nullptr),_finishCb(finishCb),_workerCall(workerCall)
+    MyLuaWorker(Napi::Function&callback,WorkerCall workerCall,FinishCallBack finishCb) :
+    Napi::AsyncWorker(callback),userParam(nullptr),callback(callback)
     {
+        this->_workerCall = workerCall;
+        _finishCb = finishCb;
         _userData.hasErr = false;
         _userData.customVal = 0;
         _userData.buff[0] = 0;
@@ -59,6 +61,7 @@ public:
     
     void* userParam;
 private:
+    Napi::Function& callback;
     FinishCallBack _finishCb;
     WorkerCall _workerCall;
     WorkerCall _queueNotify;

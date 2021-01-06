@@ -9,27 +9,26 @@
 #include "MyLuaState.hpp"
 #include "MyLuaWorker.hpp"
 #include "utils.h"
-#include <node.h>
+#include <napi.h>
 
-using v8::Function;
-using v8::Local;
-using v8::Number;
-using v8::Value;
-using Nan::AsyncQueueWorker;
-using Nan::AsyncWorker;
-using Nan::Callback;
-using Nan::HandleScope;
-using Nan::New;
-using Nan::Null;
-using Nan::To;
 
-Nan::Persistent<v8::Function> MyLuaState::constructor;
+Napi::FunctionReference MyLuaState::constructor;
 
 extern "C"{
  int luaopen_cjson(lua_State *l);
 }
 
-MyLuaState::MyLuaState(double value) {
+double glboalInstanceVal = 0;
+
+MyLuaState::MyLuaState(const Napi::CallbackInfo& info):
+        Napi::ObjectWrap<MyLuaState>(info){
+    Napi::Number value;
+    if(info[0].IsNumber()){
+        value= info[0].As<Napi::Number>();
+        glboalInstanceVal = value;
+    }else{
+        value  = Napi::Number::New(info.Env(), ++glboalInstanceVal);
+    }
     _idVal = value;
     _L = lua_open();
     int top = lua_gettop(_L);
@@ -46,66 +45,61 @@ MyLuaState::~MyLuaState() {
     lua_close(_L);
 }
 
-void MyLuaState::normalCallBack(Nan::Callback* cb,MyLuaWorker* worker){
-    HandleScope scope;
+void MyLuaState::normalCallBack(Napi::Function& cb,MyLuaWorker* worker){
     if(!cb){
         return;
     }
+    Napi::HandleScope scope(cb.Env());
     auto ret = worker->getUserData();
-    v8::Local<v8::Value> err;
-    v8::Local<v8::Value> arg2;
+    Napi::Value err;
+    Napi::Value arg2;
     if(ret.hasErr){
-        err = Nan::New(ret.buff).ToLocalChecked();
-        arg2 = Nan::Undefined();
+        err = Napi::String::New(cb.Env(),ret.buff);
+        arg2 = cb.Env().Undefined();
     }else{
-        err = Nan::Null();
-        arg2 = Nan::New(ret.buff).ToLocalChecked();
+        err = cb.Env().Null();
+        arg2 = Napi::String::New(cb.Env(),ret.buff);
     }
-    v8::Local<v8::Value> argv[] = {
-        err,arg2
-    };
-    cb->Call(2, argv);
+
+    cb.Call(cb.Env().Global(),{err,arg2});
 }
 
 
 // worker->userParam = obj; 要设置成 MyLuaState 实例
-void MyLuaState::normalGetRetCallBack(Nan::Callback* cb,MyLuaWorker* worker){
-    HandleScope scope;
+void MyLuaState::normalGetRetCallBack(Napi::Function&  cb,MyLuaWorker* worker){
     if(!cb){
         return;
     }
+    Napi::HandleScope scope(cb.Env());
     auto ret = worker->getUserData();
-    v8::Local<v8::Value> err;
+    Napi::Value err;
     if(ret.hasErr){
-        v8::Local<v8::Value> arg2;
-        err = Nan::New(ret.buff).ToLocalChecked();
-        arg2 = Nan::Undefined();
-        v8::Local<v8::Value> argv[] = {
-            err,arg2
-        };
-        cb->Call(2, argv);
+        Napi::Value arg2;
+        err = Napi::String::New(cb.Env(),ret.buff);
+        arg2 = cb.Env().Undefined();
+        cb.Call(cb.Env().Global(), {err,arg2});
     }else{
         MyLuaState* obj = (MyLuaState*)worker->userParam;
-        err = Nan::Null();
+        err = cb.Env().Null();
         auto L = obj->getLuaState();
         int len = lua_gettop(L) - worker->getUserData().customVal;
         if(len){
             //lua_to_value
-            v8::Local<v8::Value> *argv  = new v8::Local<v8::Value>[len+1];
-            argv[0] = Nan::Null();
+            Napi::Value *argv  = new Napi::Value[len+1];
+            argv[0] = cb.Env().Null();
             int i = 1;
             while (i<=len) {
                 argv[i] = lua_to_value(L, i);
                 i++;
             }
             lua_settop(L, worker->getUserData().customVal);
-            cb->Call(len+1, argv);
+            cb.Call(cb.Env().Null(), size_t(len+1), (napi_value*)argv);
             delete []argv;
         }else{
-            v8::Local<v8::Value> argv[] = {
-                err,Nan::New(ret.buff).ToLocalChecked()
+            Napi::Value argv[] = {
+                err,Napi::String::New(cb.Env(),ret.buff)
             };
-            cb->Call(2, argv);
+            cb.Call(size_t(2), (napi_value*)argv);
         }
     }
 
@@ -113,85 +107,74 @@ void MyLuaState::normalGetRetCallBack(Nan::Callback* cb,MyLuaWorker* worker){
 }
 
 
+// exports.MyLuaState = class { constructor(id){},doFile,doString,status,callGlobalFunction, static New}
+Napi::Object MyLuaState::Init(Napi::Env env,Napi::Object exports) {
+    Napi::HandleScope scope(env);
+    
+    Napi::Function func = DefineClass(env, "MyLuaState", {
+        InstanceMethod<&MyLuaState::DoFile>("doFile"),
+        InstanceMethod<&MyLuaState::DoString>("doString"),
+        InstanceMethod<&MyLuaState::Status>("status"),
+        InstanceMethod<&MyLuaState::CallGlobalFunction>("callGlobalFunction"),
+        StaticMethod<&MyLuaState::New>("New"),
+    });
+    
+    Napi::FunctionReference* constructor = new Napi::FunctionReference();
+    *constructor = Napi::Persistent(func);
+    exports.Set("MyLuaState", func);
+    
+    env.SetInstanceData<Napi::FunctionReference>(constructor);
 
-void MyLuaState::Init(v8::Local<v8::Object> exports) {
-    Nan::HandleScope scope;
-    
-    // Prepare constructor template
-    v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-    tpl->SetClassName(Nan::New("MyLuaState").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(1);
-    
-    // Prototype
-    Nan::SetPrototypeMethod(tpl, "doFile", DoFile);
-    Nan::SetPrototypeMethod(tpl, "doString", DoString);
-    Nan::SetPrototypeMethod(tpl, "status", Status);
-    Nan::SetPrototypeMethod(tpl, "callGlobalFunction", CallGlobalFunction);
-    
-    
-    constructor.Reset(tpl->GetFunction());
-    exports->Set(Nan::New("MyLuaState").ToLocalChecked(), tpl->GetFunction());
+    return exports;
 }
 
-void MyLuaState::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    if (info.IsConstructCall()) {
-        // Invoked as constructor: `new MyObject(...)`
-        double value = info[0]->IsUndefined() ? 0 : info[0]->NumberValue();
-        MyLuaState* obj = new MyLuaState(value);
-        obj->Wrap(info.This());
-        info.GetReturnValue().Set(info.This());
-    } else {
-        // Invoked as plain function `MyObject(...)`, turn into construct call.
-        const int argc = 1;
-        v8::Local<v8::Value> argv[argc] = { info[0] };
-        v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-        info.GetReturnValue().Set(cons->NewInstance(info.GetIsolate()->GetCurrentContext(), argc, argv).ToLocalChecked());
+
+
+// MyLuaState.New(121)
+Napi::Value MyLuaState::New(const Napi::CallbackInfo& info) {
+    // Retrieve the instance data we stored during `Init()`. We only stored the
+    // constructor there, so we retrieve it here to create a new instance of the
+    // JS class the constructor represents.
+    Napi::FunctionReference* constructor =
+        info.Env().GetInstanceData<Napi::FunctionReference>();
+    Napi::Number value;
+    if(info[0].IsNumber()){
+        value= info[0].As<Napi::Number>();
+        glboalInstanceVal = value;
+    }else{
+        value  = Napi::Number::New(info.Env(), ++glboalInstanceVal);
     }
+    return constructor->New({ Napi::Number::New(info.Env(), value)});
 }
 
-
-
-
-v8::Local<v8::Object> MyLuaState::NewInstance(v8::Local<v8::Value> arg) {
-    Nan::EscapableHandleScope scope;
-    
-    const unsigned argc = 1;
-    v8::Local<v8::Value> argv[argc] = { arg };
-    v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-
-	v8::Local<v8::Object> instance = cons->NewInstance(v8::Isolate::GetCurrent()->GetCurrentContext() , argc, argv).ToLocalChecked();
-    
-    return scope.Escape(instance);
-}
-
-void MyLuaState::DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info){
+Napi::Value MyLuaState::DoFile(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
     if(info.Length()<1){
-        Nan::ThrowTypeError("Wrong number of arguments");
-        return;
+        Napi::Error::New(info.Env(), "Wrong number of arguments").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(!info[0]->IsString()){
-        Nan::ThrowTypeError("arg 1 is not a string  need filepath");
-        return;
+    if(!info[0].IsString()){
+        Napi::Error::New(info.Env(), "arg 1 is not a string  need filepath").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(info.Length() > 1 && !info[1]->IsFunction()){
-        Nan::ThrowTypeError("arg 2 is not a function ");
-        return;
+    if(info.Length() > 1 && !info[1].IsFunction()){
+        Napi::Error::New(info.Env(), "arg 2 is not a function").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
     //可能要copy出来
-    v8::String::Utf8Value filename(info[0]->ToString());
-    const char* fn = *filename;
+    auto filename = info[0].ToString().Utf8Value();
+    const char* fn = filename.c_str();
     char* nfn = new char[filename.length()+1];
  //   printf(" fnfnfnfnfn :%s\n",fn);
     strcpy(nfn,fn);
 //    printf(" fnfnfnfnfn1111 :%s\n",nfn);
-    MyLuaState* obj = ObjectWrap::Unwrap<MyLuaState>(info.This());
-    Nan::Callback *callback = nullptr;
+    Napi::Function callback;
     if(info.Length()>1){
-        callback = new Nan::Callback(info[1].As<Function>());
+        callback = info[1].As<Napi::Function>();
     }
     
     MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
-        auto L = obj->getLuaState();
+        auto L = this->getLuaState();
   //      printf("worker int:%p\n",nfn);
   //      printf("begin do file :%s\n",nfn);
         int top = lua_gettop(L);
@@ -213,44 +196,46 @@ void MyLuaState::DoFile(const Nan::FunctionCallbackInfo<v8::Value>& info){
   //      printf("do file  end:%s\n",(char*)nfn);
         //要释放 fn
         delete []nfn;
-    },normalCallBack);
+    },[=](Napi::Function& cb,MyLuaWorker* worker){
+        this->normalCallBack(cb, worker);
+    });
  //   printf("worker out:%p\n",nfn);
-    int nowqueue = obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::New(nowqueue));
+    int nowqueue = this->workerQueue.addQueue(worker);
+    return Napi::Number::New(env, nowqueue);
 }
 
 
 
 
 
-void MyLuaState::DoString(const Nan::FunctionCallbackInfo<v8::Value>& info){
+Napi::Value MyLuaState::DoString(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
     if(info.Length()<1){
-        Nan::ThrowTypeError("Wrong number of arguments");
-        return;
+        Napi::Error::New(info.Env(), "Wrong number of arguments").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(!info[0]->IsString()){
-        Nan::ThrowTypeError("arg 1 is not a string  need filepath");
-        return;
+    if(!info[0].IsString()){
+        Napi::Error::New(info.Env(), "arg 1 is not a string  need lua string").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(info.Length() > 1 && !info[1]->IsFunction()){
-        Nan::ThrowTypeError("arg 2 is not a function ");
-        return;
+    if(info.Length() > 1 && !info[1].IsFunction()){
+        Napi::Error::New(info.Env(), "arg 2 is not a function").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
     //可能要copy出来
-    v8::String::Utf8Value filename(info[0]->ToString());
-    const char* fn = *filename;
+    auto filename = info[0].ToString().Utf8Value();
+    const char* fn = filename.c_str();
     char* nfn = new char[filename.length()+1];
     //   printf(" fnfnfnfnfn :%s\n",fn);
     strcpy(nfn,fn);
     //    printf(" fnfnfnfnfn1111 :%s\n",nfn);
-    MyLuaState* obj = ObjectWrap::Unwrap<MyLuaState>(info.This());
-    Nan::Callback *callback = nullptr;
+    Napi::Function callback;
     if(info.Length()>1){
-        callback = new Nan::Callback(info[1].As<Function>());
+        callback = info[1].As<Napi::Function>();
     }
     
     MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
-        auto L = obj->getLuaState();
+        auto L = this->getLuaState();
         //      printf("worker int:%p\n",nfn);
         //      printf("begin do file :%s\n",nfn);
         int top = lua_gettop(L);
@@ -267,41 +252,42 @@ void MyLuaState::DoString(const Nan::FunctionCallbackInfo<v8::Value>& info){
         //      printf("do file  end:%s\n",(char*)nfn);
         //要释放 fn
         delete []nfn;
-    },normalGetRetCallBack);
-    worker->userParam = obj;
+    },[=](Napi::Function& cb,MyLuaWorker* worker){
+        this->normalGetRetCallBack(cb, worker);
+    });
+    worker->userParam = this;
     //   printf("worker out:%p\n",nfn);
-    int nowqueue = obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::New(nowqueue));
+    int nowqueue = this->workerQueue.addQueue(worker);
+    return Napi::Number::New(env, nowqueue);
 }
 
 
-void MyLuaState::Status(const Nan::FunctionCallbackInfo<v8::Value>& info){
+Napi::Value MyLuaState::Status(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
     if(info.Length()<1){
-        Nan::ThrowTypeError("Wrong number of arguments");
-        return;
+        Napi::Error::New(info.Env(), "Wrong number of arguments").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(!info[0]->IsFunction()){
-        Nan::ThrowTypeError("arg 1 is not a function  need function");
-        return;
+    if(!info[0].IsFunction()){
+        Napi::Error::New(info.Env(), "arg 1 is not a function  need function").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    MyLuaState* obj = ObjectWrap::Unwrap<MyLuaState>(info.This());
-    Nan::Callback *callback = nullptr;
-    callback = new Nan::Callback(info[0].As<Function>());
+    Napi::Function callback= info[0].As<Napi::Function>();
     
     MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
-        auto L = obj->getLuaState();
+        auto L = this->getLuaState();
         int status = lua_status(L);
         worker->userParam = reinterpret_cast<void*>(status);
         worker->setUserData(false,"");
-    },[](Nan::Callback * cb,MyLuaWorker* worker){
+    },[=](Napi::Function& cb,MyLuaWorker* worker){
         long status = reinterpret_cast<long>(worker->userParam);
-        v8::Local<v8::Value> argv[] = {
-            Nan::Null(),Nan::New((int)status)
+        Napi::Value argv[] = {
+            env.Null(),Napi::Number::New(env, status)
         };
-        cb->Call(2, argv);
+        cb.Call(env.Global(),size_t(2),(napi_value*)argv);
     });
-    int nowqueue = obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::New(nowqueue));
+    int nowqueue = this->workerQueue.addQueue(worker);
+    return Napi::Number::New(env, nowqueue);
 
 }
 
@@ -328,37 +314,37 @@ struct Prams{
 
 
 
-char* getValStr(v8::Local<v8::Value> val){
-    if(!val->IsString()){
+char* getValStr(Napi::Value val){
+    if(!val.IsString()){
         return NULL;
     }
-    v8::String::Utf8Value val_string(val);
+    auto val_string = val.ToString().Utf8Value();
     char * val_char_ptr = new char[val_string.length() + 1];
-    strcpy(val_char_ptr, *val_string);
+    strcpy(val_char_ptr, val_string.c_str());
     return val_char_ptr;
 }
 
-void transVal(v8::Local<v8::Value> value,Prams* nowVal){
-    if (value->IsString()){
+void transVal(Napi::Value value,Prams* nowVal){
+    if (value.IsString()){
         nowVal->type = Prams::ParmType::STRING;
         nowVal->valStr = getValStr(value);
-    }else if(value->IsNumber()){
-		double i_value = value->NumberValue();
+    }else if(value.IsNumber()){
+        double i_value = value.ToNumber();
         nowVal->type = Prams::NUMBER;
         nowVal->valNum = i_value;
-    }else if(value->IsBoolean()){
-        nowVal->valBool = (int)value->ToBoolean()->Value();
+    }else if(value.IsBoolean()){
+        nowVal->valBool = (int)value.ToBoolean();
         nowVal->type = Prams::BOOLEAN;
-    }else if(value->IsObject()){
-        v8::Local<v8::Object> obj = value->ToObject();
-        v8::Local<v8::Array> keys = obj->GetPropertyNames();
+    }else if(value.IsObject()){
+        Napi::Object obj = value.ToObject();
+        Napi::Array keys = obj.GetPropertyNames();
         nowVal->type = Prams::TABLE;
-        Prams* table = new Prams[keys->Length()];
+        Prams* table = new Prams[keys.Length()];
         nowVal->valTable = table;
-        nowVal->tableLen = keys->Length();
-        for(uint32_t i = 0; i < keys->Length(); ++i){
-            v8::Local<v8::Value> key = keys->Get(i);
-            v8::Local<v8::Value> val = obj->Get(key);
+        nowVal->tableLen = keys.Length();
+        for(uint32_t i = 0; i < keys.Length(); ++i){
+            Napi::Value key = keys.Get(i);
+            Napi::Value val = obj.Get(key);
             table[i].tableKey = new Prams;
             transVal(key, table[i].tableKey);
             transVal(val, &table[i]);
@@ -370,7 +356,7 @@ void transVal(v8::Local<v8::Value> value,Prams* nowVal){
 
 
 
-Prams* transData2Params(const Nan::FunctionCallbackInfo<v8::Value>& info,int start,int end){
+Prams* transData2Params(const Napi::CallbackInfo& info,int start,int end){
     int len = end-start;
     if (len<=0) {
         return nullptr;
@@ -418,29 +404,29 @@ void transParams2LuaData(lua_State* L,Prams* arr,int len){
     delete []arr;
 }
 
-void MyLuaState::CallGlobalFunction(const Nan::FunctionCallbackInfo<v8::Value>& info){
+Napi::Value MyLuaState::CallGlobalFunction(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
     if(info.Length()<1){
-        Nan::ThrowTypeError("Wrong number of arguments");
-        return;
+        Napi::Error::New(info.Env(), "Wrong number of arguments").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    if(!info[0]->IsString()){
-        Nan::ThrowTypeError("arg 1 is not a String  need String");
-        return;
+    if(!info[0].IsString()){
+        Napi::Error::New(info.Env(), "arg 1 is not a String  need String").ThrowAsJavaScriptException();
+        return env.Undefined();
     }
-    v8::String::Utf8Value funName(info[0]->ToString());
+    auto funName = info[0].ToString().Utf8Value();
     char* functionName = new char[funName.length()+1];
     //   printf(" fnfnfnfnfn :%s\n",fn);
-    strcpy(functionName,*funName);
-    MyLuaState* obj = ObjectWrap::Unwrap<MyLuaState>(info.This());
-    Nan::Callback *callback = nullptr;
-    int end = info.Length();
-    if(info[info.Length()-1]->IsFunction()){
-        callback = new Nan::Callback(info[info.Length()-1].As<Function>());
+    strcpy(functionName,funName.c_str());
+    Napi::Function callback;
+    int end = (int)info.Length();
+    if(info[info.Length()-1].IsFunction()){
+        callback = info[info.Length()-1].As<Napi::Function>();
         end-=1;
     }
     Prams* parameters = transData2Params(info, 1, end);
     MyLuaWorker* worker = new MyLuaWorker(callback,[=](MyLuaWorker* worker){
-        auto L = obj->getLuaState();
+        auto L = this->getLuaState();
         int top = lua_gettop(L);
         worker->getUserData().customVal = top;
         lua_getglobal(L, functionName);
@@ -452,10 +438,12 @@ void MyLuaState::CallGlobalFunction(const Nan::FunctionCallbackInfo<v8::Value>& 
             worker->setUserData(false,"");
         }
         delete []functionName;
-    },normalGetRetCallBack);
-    worker->userParam = obj;
-    int nowqueue = obj->workerQueue.addQueue(worker);
-    info.GetReturnValue().Set(Nan::New(nowqueue));
+    },[=](Napi::Function& cb,MyLuaWorker* worker){
+        this->normalGetRetCallBack(cb, worker);
+    });
+    worker->userParam = this;
+    int nowqueue = this->workerQueue.addQueue(worker);
+    return Napi::Number::New(env, nowqueue);
     
 }
 

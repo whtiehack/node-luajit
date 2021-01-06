@@ -1,8 +1,8 @@
 #define BUILDING_NODELUA
-#include "luastate.h"
-#include <v8.h>
-#include <nan.h>
-using namespace v8;
+//#include "luastate.h"
+//#include <v8.h>
+//#include <nan.h>
+//using namespace v8;
 //
 //uv_async_t async;
 //std::map<char*, Nan::Persistent<Function> > functions;
