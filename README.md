@@ -1,4 +1,11 @@
-## Node-luajit binding
+
+## Node-luajit binding 
+
+support npai version 6(node minimum version  v10.20.0).
+
+need lower version check the branch 8.x-10.x or 6.x.
+
+
 #### Cross platform.  (win,mac,linux)[x64]
 similar as `https://github.com/brettlangdon/NodeLua`
 
@@ -12,6 +19,7 @@ similar as `https://github.com/brettlangdon/NodeLua`
 5. add,linux auto compile luajit.[2018-01-29] http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
 6. add, cjson compile and auto load.  [2018-01-29] https://github.com/openresty/lua-cjson/archive/master.zip
 7. > win64 need fix.
+8. support napi.  support node 10.20.x-14.x [2021-01-06]
 
 
 ##Installation
@@ -23,7 +31,8 @@ npm install node-luajit --unsafe-perm
 
 ```
 
-#### node 8.x 10.x: 
+#### node napi
+
 Linux build luajit
 ```
 git clone https://github.com/LuaJIT/LuaJIT.git

@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "node-luajit",
+      "target_name": "<(module_name)",
       "variables": {
         "lua_include": "",
         "lib_dirs": ""
@@ -86,10 +86,27 @@
         "3rdlibs/lua-cjson/lua_cjson.c",
         "3rdlibs/lua-cjson/strbuf.c"
       ],
-      "include_dirs": [
-        "<!@(node -p \"require('node-addon-api').include\")"
-      ],
-      'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
-    }
+        "include_dirs": [
+            "<!@(node -p \"require('node-addon-api').include\")"
+        ],
+        "dependencies": [
+            "<!(node -p \"require('node-addon-api').gyp\")"
+        ],
+        "defines": [
+            "NAPI_VERSION=<(napi_build_version)",
+            "NAPI_DISABLE_CPP_EXCEPTIONS",
+        ]
+    },
+        {
+          "target_name": "action_after_build",
+          "type": "none",
+          "dependencies": [ "<(module_name)" ],
+          "copies": [
+            {
+              "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
+              "destination": "<(module_path)"
+            }
+          ]
+        }
   ]
 }

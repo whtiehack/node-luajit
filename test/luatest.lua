@@ -20,3 +20,5 @@ function testArgAndRetGlobalCall(arg1,arg2,arg3tbl)
 end
 
 print("luatest.lua run finished")
+
+return 1,"8",{"b","12",23}

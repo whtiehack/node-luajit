@@ -1,16 +1,8 @@
 'use strict';
-let nodelua = null;
 let path = require('path');
-try {
-    nodelua = require('./build/Release/node-luajit');
-} catch (e) {
-    console.log('```  release load err:', e);
-    try{
-        nodelua = require('./build/Debug/node-luajit');
-    }catch (e){
-        nodelua = require('/Users/nuc/Library/Developer/Xcode/DerivedData/binding-ebwzqyofwzjwfzcrbpisobhcazli/Build/Products/Debug/node-luajit.node')
-    }
-}
+const binary = require('node-pre-gyp');
+const binding_path = binary.find(path.resolve(path.join(__dirname, 'package.json')));
+const nodelua = require(binding_path);
 
 let MyCLua = nodelua['MyLuaState'];
 

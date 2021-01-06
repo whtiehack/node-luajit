@@ -16,3 +16,9 @@ build
 3rdlibs/LuaJIT/src/host/buildvm_arch.h
 3rdlibs/LuaJIT/src/host/minilua
 3rdlibs/LuaJIT/src/jit/vmdef.lua
+
+
+build/
+build*/
+binding/
+

@@ -50,7 +50,7 @@ void MyLuaState::normalCallBack(Napi::Function& _cb,MyLuaWorker* worker){
         return;
     }
     auto env = worker->Callback().Env();
-    // Napi::HandleScope scope(env);
+    Napi::HandleScope scope(env);
     auto ret = worker->getUserData();
     Napi::Value err;
     Napi::Value arg2;
@@ -71,7 +71,7 @@ void MyLuaState::normalGetRetCallBack(Napi::Function&  ccx,MyLuaWorker* worker){
         return;
     }
     auto env = worker->Callback().Env();
-    // Napi::HandleScope scope(env);
+    Napi::HandleScope scope(env);
     auto ret = worker->getUserData();
     Napi::Value err;
     if(ret.hasErr){
@@ -107,7 +107,7 @@ void MyLuaState::normalGetRetCallBack(Napi::Function&  ccx,MyLuaWorker* worker){
 
 // exports.MyLuaState = class { constructor(id){},doFile,doString,status,callGlobalFunction, static New}
 Napi::Object MyLuaState::Init(Napi::Env env,Napi::Object exports) {
-    // Napi::HandleScope scope(env);
+    Napi::HandleScope scope(env);
     
     Napi::Function func = DefineClass(env, "MyLuaState", {
         InstanceMethod<&MyLuaState::DoFile>("doFile"),
