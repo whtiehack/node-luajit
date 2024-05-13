@@ -39,7 +39,7 @@
   "devDependencies": {
     "co": "4.6.0",
     "node-addon-api": "4.2.0",
-    "node-pre-gyp-github": "1.4.4"
+    "node-pre-gyp-github": "2.0.0"
   },
   "binary": {
     "module_name": "node-luajit",
