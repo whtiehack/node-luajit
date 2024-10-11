@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "co": "4.6.0",
-    "node-addon-api": "4.2.0",
+    "node-addon-api": "8.2.1",
     "node-pre-gyp-github": "1.4.4"
   },
   "binary": {
